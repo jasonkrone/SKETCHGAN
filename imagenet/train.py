@@ -9,7 +9,7 @@ def train(self, config):
     d_optim = self.d_optim
     g_optim = self.g_optim
 
-    tf.initialize_all_variables().run()
+    tf.global_variables_initializer().run()
 
     self.saver = tf.train.Saver()
     #self.g_sum = tf.merge_summary([#self.z_sum,
@@ -17,7 +17,7 @@ def train(self, config):
     #    self.G_sum, self.d_loss_fake_sum, self.g_loss_sum])
     # self.d_sum = tf.merge_summary([#self.z_sum,
     #     self.d_sum, self.d_loss_real_sum, self.d_loss_sum])
-    self.writer = tf.train.SummaryWriter("./logs", self.sess.graph_def)
+    self.writer = tf.summary.FileWriter("./logs", self.sess.graph_def)
 
 
     coord = tf.train.Coordinator()
@@ -65,6 +65,7 @@ def train(self, config):
 
             #for i in xrange(3):
             #    self.sess.run([d_optim], feed_dict=feed_dict)
+            print 'about to run\n'
 
             _d_optim, _d_sum, \
             _g_optim,  \
@@ -77,6 +78,7 @@ def train(self, config):
                                             self.g_losses[0]])
 
             counter += 1
+            print 'time:', time.time() - print_time
             if time.time() - print_time > 15.:
                 print_time = time.time()
                 total_time = print_time - start_time

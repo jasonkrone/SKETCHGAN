@@ -5,8 +5,7 @@ from ops import avg_grads
 from model import read_and_decode_with_labels
 from model import get_vars
 IMSIZE = 128
-filename = '/media/NAS_SHARED/imagenet/imagenet_train_labeled_' + str(IMSIZE) + '.tfrecords'
-
+filename = '/a/h/swoolf02/SKETCHGAN/imagenet/imagenet_train_labeled_128.tfrecords'
 
 def build_model(self):
     all_d_grads = []
@@ -19,18 +18,21 @@ def build_model(self):
         with tf.device("/%s" % device):
             with tf.name_scope("device_%s" % idx):
                 with variables_on_gpu0():
-                    build_model_single_gpu(self, idx)
+
+                    build_model_single_gpu(self , idx)
                     d_grads = d_opt.compute_gradients(self.d_losses[-1], var_list=self.d_vars)
                     g_grads = g_opt.compute_gradients(self.g_losses[-1], var_list=self.g_vars)
                     all_d_grads.append(d_grads)
                     all_g_grads.append(g_grads)
-                    tf.get_variable_scope().reuse_variables()
+                    #tf.get_variable_scope().reuse_variables()
+
     avg_d_grads = avg_grads(all_d_grads)
     avg_g_grads = avg_grads(all_g_grads)
     self.d_optim = d_opt.apply_gradients(avg_d_grads)
     self.g_optim = g_opt.apply_gradients(avg_g_grads)
 
 def build_model_single_gpu(self, gpu_idx):
+
     assert not self.y_dim
 
     if gpu_idx == 0:
@@ -66,6 +68,7 @@ def build_model_single_gpu(self, gpu_idx):
     G, zs = self.generator(is_ref=False)
 
     if gpu_idx == 0:
+
         G_means = tf.reduce_mean(G, 0, keep_dims=True)
         G_vars = tf.reduce_mean(tf.square(G - G_means), 0, keep_dims=True)
         G = tf.Print(G, [tf.reduce_mean(G_means), tf.reduce_mean(G_vars)], "generator mean and average var", first_n=1)
@@ -78,12 +81,12 @@ def build_model_single_gpu(self, gpu_idx):
     self.zses.append(zs)
 
     joint = tf.concat(0, [images, G])
-    class_logits, D_on_data, D_on_data_logits, D_on_G, D_on_G_logits = self.discriminator(joint, reuse=True, prefix="joint ")
+    class_logits, D_on_data, D_on_data_logits, D_on_G, D_on_G_logits = self.discriminator(joint, reuse=True , prefix="joint ")
     # D_on_G_logits = tf.Print(D_on_G_logits, [D_on_G_logits], "D_on_G_logits")
 
-    self.d_sum = tf.histogram_summary("d", D_on_data)
-    self.d__sum = tf.histogram_summary("d_", D_on_G)
-    self.G_sum = tf.image_summary("G", G)
+    self.d_sum = tf.summary.histogram("d", D_on_data)
+    self.d__sum = tf.summary.histogram("d_", D_on_G)
+    self.G_sum = tf.summary.image("G", G)
 
     d_label_smooth = self.d_label_smooth
     d_loss_real = sigmoid_kl_with_logits(D_on_data_logits, 1. - d_label_smooth)
