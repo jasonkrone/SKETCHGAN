@@ -19,6 +19,17 @@ MODEL_DIR = '/tmp/imagenet'
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
 softmax = None
 
+def images_from_sample(sample_path):
+  batch_size = 64
+  sample = scipy.misc.imread(sample_path)
+  images = []
+  for i in xrange(0, 1024, 128):
+    for j in xrange(0, 1024, 128):
+      img = sample[i:i+128,j:j+128,:]
+      images.append(sample[i:i+128,j:j+128,:])
+  shapes = [i.shape for i in images]
+  return images
+
 # Call this function with list of images. Each of elements should be a 
 # numpy array with values ranging from 0 to 255.
 def get_inception_score(images, splits=10):
@@ -94,3 +105,17 @@ def _init_inception():
 
 if softmax is None:
   _init_inception()
+
+'''
+nums = [10, 1439, 14293, 20445]
+for n in nums:
+  images = images_from_sample('/a/h/jkrone02/SKETCHGAN/samples/train_' + str(n) + '.png')
+  print('train_' + str(n) + 'inception score:', get_inception_score(images))
+'''
+images = [np.random.randint(0, high=255, size=(128, 128, 3)) for i in xrange(64)]
+print('rand inception score:', get_inception_score(images))
+'''
+images = [scipy.misc.imread('/a/h/swoolf02/imagenet/n01484850_24188.JPEG'),
+        scipy.misc.imread('/a/h/swoolf02/imagenet/n01484850_24188.JPEG')]
+print('train_imagenet inception score:', get_inception_score(images))
+'''

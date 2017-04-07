@@ -5,7 +5,7 @@ from ops import avg_grads
 from model import read_and_decode_with_labels
 from model import get_vars
 IMSIZE = 128
-filename = '/a/h/swoolf02/SKETCHGAN/imagenet/imagenet_train_labeled_128.tfrecords'
+filename = '/a/h/jkrone02/sketchy_photos.tfrecords'
 
 def build_model(self):
     all_d_grads = []

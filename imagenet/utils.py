@@ -36,6 +36,10 @@ def merge_images(images, size):
     return inverse_transform(images)
 
 def merge(images, size):
+    print 'images shape:', images.shape
+    print 'images[1] shape:', images[1].shape
+    print 'images[2] shape:', images[2].shape
+    print 'size', size
     h, w = images.shape[1], images.shape[2]
     img = np.zeros((h * size[0], w * size[1], 3))
 
@@ -155,14 +159,18 @@ def visualize(sess, dcgan, config, option):
   option = 0
   if option == 0:
     all_samples = []
-    for i in range(484):
+    # TODO: remove hardcoded
+    print(len(dcgan.Gs))
+    for i in range(2):#range(484):
       print(i)
-      samples = sess.run(dcgan.G)
+      samples = sess.run(dcgan.Gs[-1])
+      #samples = sess.run(dcgan.G)
       all_samples.append(samples)
     samples = np.concatenate(all_samples, 0)
     n = int(np.sqrt(samples.shape[0]))
     m = samples.shape[0] // n
-    save_images(samples, [m, n], './' + config.sample_dir + '/test.png')#_%s.png' % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    print('samples: ', samples.shape, 'sample: ', samples[0].shape)
+    save_images(samples, [8, 8], config.sample_dir+'/test.png')#'./' + config.sample_dir + '/test.png')#_%s.png' % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
   elif option == 5:
     counter = 0
     coord = tf.train.Coordinator()

@@ -6,7 +6,7 @@ import tensorflow as tf
 from ops import *
 from utils import *
 
-filename = '/a/h/swoolf02/SKETCHGAN/imagenet/imagenet_train_labeled_128.tfrecords'
+filename = '/a/h/jkrone02/sketchy_photos.tfrecords'
 
 class DCGAN(object):
     def __init__(self, sess, image_size=108, is_crop=True,
@@ -223,6 +223,8 @@ class DCGAN(object):
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
+            print('os.path.join(checkpoint_dir, ckpt_name)',
+            os.path.join(checkpoint_dir, ckpt_name))
             self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
             return True
         else:

@@ -1,8 +1,9 @@
-from scipy.misc import imread
+from scipy.misc import imread, imresize, imsave
 from random import shuffle
 import time, os
 
 import tensorflow as tf
+import numpy as np
 from glob import glob
 from utils import get_image, colorize
 # this is based on tensorflow tutorial code
@@ -12,7 +13,7 @@ from utils import get_image, colorize
 # i am only doing that because it is what the tensorflow tutorial does.
 # should probably figure out how to store them as JPEG.
 
-IMSIZE = 256
+IMSIZE = 128
 NUM_CLASSES = 125
 
 def _int64_feature(value):
@@ -35,16 +36,12 @@ def main(argv):
 	#file_class_dict = make_file_class_csv('TODO')
     pattern = \
     "/a/h/jkrone02/Downloads/rendered_256x256/256x256/photo/tx_000100000000/*/*jpg"
-    print 'input data:', pattern
     files = glob(pattern)
-    print 'files:', files[:5], len(files)
 
     dirs = glob("/a/h/jkrone02/Downloads/rendered_256x256/256x256/photo/tx_000100000000/*")
-    print 'class dirs:', dirs
     assert len(dirs) == NUM_CLASSES, len(dirs)
     dirs = [d.split('/')[-1] for d in dirs]
     dirs = sorted(dirs)
-    print 'classes:', dirs
     str_to_int = dict(zip(dirs, range(len(dirs))))
     outfile = '/a/h/jkrone02/sketchy_photos' + '.tfrecords'
     writer = tf.python_io.TFRecordWriter(outfile)
@@ -54,12 +51,25 @@ def main(argv):
         image = get_image(f, IMSIZE, is_crop=True, resize_w=IMSIZE)
         image = colorize(image)
         assert image.shape == (IMSIZE, IMSIZE, 3)
+        image += 1.
+        image *= (255. / 2.)
+        image = image.astype('uint8')
+        if i == 10:
+            imsave('foo.png', (image + 1.) / 2.)
+            imsave('foo_og.png', imread(f))
+        ''' 
+        #image = get_image(f, IMSIZE, is_crop=True, resize_w=IMSIZE)
+        image = imresize(imread(f), (64, 64))
+        images = np.array(image)/127.5 - 1.
+        image = colorize(image)
+        assert image.shape == (IMSIZE, IMSIZE, 3)
         #image += 1.
         #image *= (255. / 2.)
         image = image.astype('uint8')
         #print image.min(), image.max()
         # from pylearn2.utils.image import save
         # save('foo.png', (image + 1.) / 2.)
+        '''
         image_raw = image.tostring()
         class_str = f.split('/')[-2]
         label = str_to_int[class_str]
